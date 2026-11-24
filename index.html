@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Українські переклади мобільних ігор — патчер</title>
+<style>
+  :root { --bg: #15130f; --card: #211c15; --line: #3a3122; --ink: #f2e9d8; --dim: #a89c86; --acc: #f3c614; --bad: #ff7a5c; --ok: #9fdc6a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 40px 20px 60px; }
+  h1 { font-size: 28px; margin: 0 0 4px; } h1 span { color: var(--acc); }
+  .sub { color: var(--dim); margin: 0 0 26px; }
+  .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .game { text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; color: var(--ink); cursor: pointer; font: inherit; }
+  .game:hover { border-color: #6b5a39; }
+  .game.on { border-color: var(--acc); box-shadow: 0 0 0 1px var(--acc) inset; }
+  .game b { display: block; font-size: 17px; }
+  .game small { color: var(--dim); display: block; }
+  .game i { font-style: normal; font-size: 12px; color: var(--acc); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; margin-bottom: 18px; }
+  .need { color: var(--dim); margin: 0 0 14px; }
+  .drop { border: 2px dashed #5a4b31; border-radius: 10px; padding: 28px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; }
+  .drop:hover, .drop.over { border-color: var(--acc); background: #2a2318; }
+  .drop b { color: var(--acc); }
+  input[type=file] { display: none; }
+  label.opt { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0 0; cursor: pointer; }
+  label.opt input { margin-top: 4px; accent-color: var(--acc); }
+  label.opt small { display: block; color: var(--dim); }
+  button.go { margin-top: 18px; width: 100%; padding: 13px; font: 600 16px system-ui, sans-serif; border: 0; border-radius: 9px; background: var(--acc); color: #1b1608; cursor: pointer; }
+  button.go:disabled { background: #4a412f; color: #8b7f68; cursor: default; }
+  #log { font: 13px/1.6 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; color: var(--dim); margin-top: 14px; }
+  #log .ok { color: var(--ok); } #log .bad { color: var(--bad); }
+  .foot { font-size: 13px; color: #7d725e; }
+  .foot p { margin: 6px 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Переклади <span>UA</span></h1>
+  <p class="sub">Українські фанатські переклади старих мобільних ігор. Виберіть гру, дайте патчеру свій файл гри — отримаєте його українською. Файл обробляється тут, у браузері, і нікуди не надсилається.</p>
+
+  <div class="games" id="games"></div>
+
+  <div class="card" id="work" hidden>
+    <p class="need" id="need"></p>
+    <div class="drop" id="drop"></div>
+    <input type="file" id="file">
+    <div id="opts"></div>
+    <button class="go" id="go" disabled>Пропатчити й завантажити</button>
+    <div id="log"></div>
+  </div>
+
+  <div class="foot">
+    <p>Тут немає файлів ігор: лише тексти перекладів і домальовані літери. Гру потрібно мати свою.</p>
+    <p>Переклади некомерційні й не пов'язані з правовласниками ігор. Код патчера — MIT.</p>
+  </div>
+</main>
+<script type="module">
+import { applyPatch } from './core/patcher.js';
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+const log = (msg, cls) => { const d = document.createElement('div'); d.textContent = msg; if (cls) d.className = cls; $('log').append(d); };
+let games = [], game = null, data = null, fileName = '';
+
+function resetDrop() {
+  data = null;
+  $('drop').innerHTML = 'Перетягніть сюди файл гри<br><small>або натисніть, щоб вибрати</small>';
+  $('go').disabled = true;
+  $('log').textContent = '';
+}
+
+function pick(g) {
+  game = g;
+  document.querySelectorAll('.game').forEach((b) => b.classList.toggle('on', b.dataset.id === g.id));
+  $('work').hidden = false;
+  $('need').innerHTML = 'Потрібно: ' + esc(g.input);
+  $('file').accept = g.accept || '';
+  $('opts').innerHTML = (g.options || []).map((o) =>
+    `<label class="opt"><input type="checkbox" data-opt="${esc(o.id)}"><span>${esc(o.label)}<small>${esc(o.hint || '')}</small></span></label>`).join('');
+  resetDrop();
+  history.replaceState(null, '', '#' + g.id);
+}
+
+function take(f) {
+  if (!f) return;
+  fileName = f.name;
+  f.arrayBuffer().then((b) => {
+    data = new Uint8Array(b);
+    $('drop').innerHTML = '<b>' + esc(f.name) + '</b><br><small>' + Math.round(b.byteLength / 1024) + ' КБ — інший файл: натисніть ще раз</small>';
+    $('go').disabled = false;
+    $('log').textContent = '';
+  });
+}
+$('drop').onclick = () => $('file').click();
+$('file').onchange = (e) => { take(e.target.files[0]); e.target.value = ''; };
+$('drop').ondragover = (e) => { e.preventDefault(); $('drop').classList.add('over'); };
+$('drop').ondragleave = () => $('drop').classList.remove('over');
+$('drop').ondrop = (e) => { e.preventDefault(); $('drop').classList.remove('over'); take(e.dataTransfer.files[0]); };
+
+$('go').onclick = async () => {
+  $('go').disabled = true;
+  $('log').textContent = '';
+  try {
+    if (typeof DecompressionStream === 'undefined') throw new Error('цей браузер застарий: потрібен свіжий Chrome, Firefox або Safari');
+    const patch = await (await fetch(`games/${game.id}/patch.json`)).json();
+    const options = {};
+    document.querySelectorAll('[data-opt]').forEach((c) => { options[c.dataset.opt] = c.checked; });
+    const blob = await applyPatch(data, patch, options, (m) => log(m));
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName.replace(/\.[^.]+$/, '') + (game.suffix || '_ua');
+    a.click();
+    log('Готово: ' + a.download, 'ok');
+  } catch (e) {
+    log('Помилка: ' + e.message, 'bad');
+  }
+  $('go').disabled = false;
+};
+
+games = await (await fetch('games.json')).json();
+$('games').innerHTML = games.map((g) =>
+  `<button class="game" data-id="${esc(g.id)}"><b>${esc(g.title)}</b><small>${esc(g.original)}</small><i>${esc(g.status || '')}</i></button>`).join('');
+document.querySelectorAll('.game').forEach((b) => { b.onclick = () => pick(games.find((g) => g.id === b.dataset.id)); });
+const hash = location.hash.slice(1);
+pick(games.find((g) => g.id === hash) || games[0]);
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "liquidator",
+    "title": "Ліквідатор",
+    "original": "Liquidator — NET Lizard, 2006",
+    "input": "jar гри, версія 240×320 для Samsung (liquidator_rus.jar)",
+    "accept": ".jar",
+    "suffix": "_ua.jar",
+    "status": "готово",
+    "translator": "",
+    "options": [
+      { "id": "lilkaHelp", "label": "Довідка з кнопками Лілки", "hint": "Для консолі Лілка. Без позначки в довідці лишаються клавіші телефона." }
+    ]
+  }
+]

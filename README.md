@@ -1,0 +1,44 @@
+# Переклади UA — патчер
+
+Українські фанатські переклади старих мобільних ігор в одному веб-патчері. Відкриваєте сторінку,
+вибираєте гру й свій файл гри — отримуєте його українською. Файл обробляється в браузері й нікуди не
+надсилається.
+
+**Сторінка:** https://<нік>.github.io/<репозиторій>/  (пряме посилання на гру: `…/#liquidator`)
+
+| Гра | Що потрібно | Стан |
+|---|---|---|
+| Ліквідатор (NET Lizard, 2006) | jar 240×320 для Samsung | готово |
+
+## Як це влаштовано
+- `index.html` — сторінка; список ігор — `games.json`.
+- `core/patcher.js` — патчер без залежностей (zip, PNG, тексти). Кожна гра має свій тип патча (`kind`).
+- `games/<гра>/patch.json` — український текст, нові літери й контрольні суми версії, під яку зроблено патч.
+  Патчер звіряє суми й не зіпсує файл іншої версії.
+- **Файлів ігор тут немає**: ні тексту оригіналів, ні графіки, ні коду.
+
+## Без браузера
+```
+node tools/cli.mjs liquidator liquidator_rus.jar liquidator_ua.jar --lilkaHelp
+```
+
+## Нова гра
+1. Додати запис у `games.json` (id, назва, що потрібно, опції).
+2. Покласти `games/<id>/patch.json`; якщо формат гри новий — дописати тип у `core/patcher.js` (`KINDS`).
+
+## Ліквідатор
+`games/liquidator/patch.json` збирається з таблиці перекладу:
+`python3 games/liquidator/build_patch.py переклад.tsv > games/liquidator/patch.json`
+(таблицю з оригінальним текстом у репозиторій не кладіть). Є, Ї, Ґ стають на місця Э, Ъ, Ы у шрифтах
+гри, І — латинська I, тож код гри не змінюється й jar працює всюди, де й оригінал.
+
+## GitHub Pages
+Settings → Pages → Source: *Deploy from a branch*, гілка `main`, папка `/ (root)`.
+
+---
+Код — MIT (див. LICENSE). Тексти перекладів — робота перекладачів. Ігри належать їхнім правовласникам;
+якщо правовласник попросить прибрати переклад — прибираємо.
+
+### English
+Ukrainian fan translations of old mobile games as one browser patcher: pick a game and your own file,
+get it back in Ukrainian. Nothing is uploaded; no game files are in this repository.
