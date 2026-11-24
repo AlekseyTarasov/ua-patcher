@@ -4,8 +4,6 @@
 вибираєте гру й свій файл гри — отримуєте його українською. Файл обробляється в браузері й нікуди не
 надсилається.
 
-**Сторінка:** https://<нік>.github.io/<репозиторій>/  (пряме посилання на гру: `…/#liquidator`)
-
 | Гра | Що потрібно | Стан |
 |---|---|---|
 | Ліквідатор (NET Lizard, 2006) | jar 240×320 для Samsung | готово |
@@ -22,18 +20,11 @@
 node tools/cli.mjs liquidator liquidator_rus.jar liquidator_ua.jar --lilkaHelp
 ```
 
-## Нова гра
-1. Додати запис у `games.json` (id, назва, що потрібно, опції).
-2. Покласти `games/<id>/patch.json`; якщо формат гри новий — дописати тип у `core/patcher.js` (`KINDS`).
-
 ## Ліквідатор
 `games/liquidator/patch.json` збирається з таблиці перекладу:
 `python3 games/liquidator/build_patch.py переклад.tsv > games/liquidator/patch.json`
 (таблицю з оригінальним текстом у репозиторій не кладіть). Є, Ї, Ґ стають на місця Э, Ъ, Ы у шрифтах
 гри, І — латинська I, тож код гри не змінюється й jar працює всюди, де й оригінал.
-
-## GitHub Pages
-Settings → Pages → Source: *Deploy from a branch*, гілка `main`, папка `/ (root)`.
 
 ---
 Код — MIT (див. LICENSE). Тексти перекладів — робота перекладачів. Ігри належать їхнім правовласникам;
