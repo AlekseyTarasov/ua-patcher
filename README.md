@@ -27,8 +27,7 @@ node tools/cli.mjs liquidator liquidator_rus.jar liquidator_ua.jar --lilkaHelp
 гри, І — латинська I, тож код гри не змінюється й jar працює всюди, де й оригінал.
 
 ---
-Код — MIT (див. LICENSE). Тексти перекладів — робота перекладачів. Ігри належать їхнім правовласникам;
-якщо правовласник попросить прибрати переклад — прибираємо.
+Код — MIT (див. LICENSE).
 
 ### English
 Ukrainian fan translations of old mobile games as one browser patcher: pick a game and your own file,
